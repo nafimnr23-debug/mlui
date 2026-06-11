@@ -1,0 +1,143 @@
+so i made a app before, where i open one or more image file and run a ml model inference in background and it output json, for each image has separate json. 
+
+I'll open and image in the left side image list, if a image has it's own json it'll have green border, if it doesn't have json it'll show red border around image thumbnail. app will show image list thumbnail on left i can show hide it using left button that is used similar to ide or photoshop to hide side panel, i can select which image to inference, i mark and click run ml model, in app there is buttons, clicking on it will highlight that specific conture and let me edit the conture, after edit i click save, it'll replace the new conture position in json.
+
+
+
+there are many buttons, and i want my this website to become universal, so i was thinking making a web app with react and vite, user login, and use select the ml model and run the ml script inference and may edit the inference if needed, that image and json will be saved in database for later if he wants to view or share with other user.
+
+
+
+now let's talk about admin, admin will open json at first as there is no ml model or conture to do, he open sample json file and he click get buttons from here and can use that json keys as buttons, button will have button name, button keys name, button position, what button does,
+
+add new button option to create new button and a script for per button to set what those button will do, like if button is clicked, save json with new contour, or if button is click edit this specific conture, or if button is clicked stop and discard edit of conture, edit button color , text color, and other visuals, position, when admin is in panel edit or creator mode, grid will show up and he can put those buttons whereever he wants, that image list picker and buttons are like widget, there is widget bar only admin can access when creating this clicking ctrl+m or other key which can be selected in setting will show hide widget panel, one widget will not overlap other widget, like in the image, those buttons is not overlapping image preview,
+
+
+
+when he import button from json it'll auto create those buttons in widget for him to use, and in the middle there is image preview and editor window, if you are confused you can ask things,
+why uploaded image not showing up, also, i can't import buttons from json and it's keys.
+also let me put button on left right top and bottom of the preview window, so
+at start home screen there is only thumbnail with project name if there is any ml project created, then user click on it and go to the window where he upload image to inference, see buttons, edit the contour save, export json etc, i added example json structure for your reference and it can be different for different ml script
+
+for admin, at home he will see same things, but when he goes to a new window where only admin can go, he can create new project, edit app window, buttons and script window to do this like the image.png, every button will have it's own name and callable from here like this, for it make a custom library type of thing to call these functions and create the backend of the buttons and other functions,
+
+for button placemment and widget placement look at
+button_example.jpeg similar to it admin will see a whole dot grid window, here he will place widgets, and there will be widget sidebar on left from here he will pick widgets(buttons, image editor and preview window, file open and manage window).
+currently what you did is hard coded file manage window, button panel and image preview window to the page, i don't want that, i might want button above image preview or under it, so i want all these widget resizeable and editable, i can change button names, as button names and identifier for script can be different
+at start home screen there is only thumbnail with project name if there is any ml project created, then user click on it and go to the window where he upload image to inference, see buttons, edit the contour save, export json etc, i added example json structure for your reference and it can be different for different ml script
+
+for admin, at home he will see same things, but when he goes to a new window where only admin can go, he can create new project, edit app window, buttons and script window to do this like the image.png, every button will have it's own name and callable from here like this, for it make a custom library type of thing to call these functions and create the backend of the buttons and other functions,
+
+for button placemment and widget placement look at
+button_example.jpeg similar to it admin will see a whole dot grid window, here he will place widgets, and there will be widget sidebar on left from here he will pick widgets(buttons, image editor and preview window, file open and manage window).
+currently what you did is hard coded file manage window, button panel and image preview window to the page, i don't want that, i might want button above image preview or under it, so i want all these widget resizeable and editable, i can change button names, as button names and identifier for script can be different
+
+make is so i can later change db to mongodb
+ya now make website with react  and vite, admin can upload model folder and python code, and run terminal commant to install library,
+whenever admin add new project or ml inference thing, it create a folder for that project, install venv for each project, admin can manage that specific project folder like delete, copy upload edit, like tiny online ide.
+also for image after user run inference it saves the inferenced json and image to that user database.
+if multiple user run inference at the same time then what to do? let's think of it later....
+
+so the plan
+Plan: Universal ML Inference Web Platform with Admin Widget Builder
+
+1. Foundation and Authentication
+
+Set up Bolt Database auth with email/password login
+Define two roles: user and admin via a profiles table
+Create the database schema: projects, images, inference_results, widget_layouts, button_configs, user_project_access
+Home screen showing project cards as thumbnails with project name and last-used date
+Clicking a card enters the project workspace; admins also see a "Manage Projects" entry point
+2. Database and Storage Schema
+
+Projects table: id, name, description, created_by, model_folder_path, python_entry_script
+Images table: id, project_id, user_id, filename, storage_path, status (pending / inferenced)
+Inference results table: id, image_id, json_data (JSONB), edited_json_data (JSONB), created_at
+Widget layouts table: id, project_id, layout_config (JSONB storing widget positions, sizes, types)
+Button configs table: id, project_id, label, json_key, action_type, action_script, visual_config (colors, size)
+All image files stored in Bolt Database Storage, one bucket per project
+3. Project Workspace — Core Layout Engine
+
+The workspace renders a free-form canvas divided into a dot-grid (like button_example.jpeg)
+Users see the saved layout; admins can toggle "Edit Layout Mode" (Ctrl+M or configurable hotkey)
+In Edit Layout Mode, a left sidebar shows draggable widget types: File Manager, Image Preview, Button Panel, Console
+Widgets snap to grid, cannot overlap (collision detection on drop)
+Each widget is independently resizable by dragging corners
+Layout config is saved as JSON per project in the widget_layouts table
+Button panels can be placed above, below, left, or right of the preview widget
+4. File Manager Widget
+
+Shows all images uploaded to this project by the current user
+Green border on thumbnail = inference JSON exists; red border = no JSON yet
+Ctrl+Click for multi-select; checkboxes appear on hover
+Sort by name, date, status
+"Select Folder" to batch-upload multiple images
+Refresh button to re-sync with storage
+Summary bar showing X images, Y with JSON, Z missing
+5. Image Preview and Contour Editor Widget
+
+Canvas-based viewer using HTML5 Canvas or a lightweight canvas library
+Loads the selected image; overlays contours, keypoints, mandible, maxilla from the JSON
+Each JSON layer (Mandible, Maxilla, Contours, Keypoints, Left Edge, Right Edge, Bone Points, Loss %) is toggled by its corresponding button
+Clicking a button highlights just that contour/layer on the canvas
+Edit mode: draggable control points on the active contour path
+Save button writes edited contour coordinates back to the inference_results table (edited_json_data column)
+Discard button reverts to original inference JSON
+Zoom/pan controls; Ctrl+Scroll to zoom
+6. Button System — User Side
+
+Buttons are rendered inside a Button Panel widget
+Each button has: display label, associated JSON key, action type (highlight layer, edit contour, save, discard, export)
+Visual state: active/inactive/disabled, custom background and text color
+Buttons arranged in a configurable grid layout within the panel widget
+Clicking a button fires the associated action via a central event bus
+7. Admin — Project Creation and Management
+
+Admin-only route /admin with a "New Project" form: name, description
+Creating a project creates a server-side folder for that project and initializes a Python venv
+Admin can upload Python model files and a requirements.txt via a file browser UI
+Terminal panel (read-only output stream) shows pip install progress and script output
+File manager panel for the project folder: view directory tree, upload files, delete, rename, copy — a mini online IDE
+"Run Inference" triggers the project's Python script on selected images, streams stdout/stderr to the console widget
+Inference output JSON is parsed and saved to the inference_results table
+8. Admin — Widget Layout Editor
+
+Full-screen dot-grid canvas, similar to the Steam Deck controller layout editor in button_example.jpeg
+Left sidebar lists available widgets to drag onto the canvas
+Placed widgets show resize handles and a settings gear icon
+Widgets cannot overlap (pushed apart or rejected on collision)
+"Save Layout" stores the config; this becomes the default layout for all users of that project
+Users can reset to the admin-defined default or save a personal override
+9. Admin — Button Builder and JSON Key Importer
+
+"Import from JSON" workflow: admin uploads or pastes a sample JSON file
+The system parses all top-level and nested keys and presents them as a list
+Admin checks which keys should become buttons
+For each selected key, a button config form opens: display label (can differ from key name), action type, action script (a small JS snippet or predefined action), button color, text color, position in the button panel grid
+"Add New Button" manually creates a button from scratch with the same form
+Saved buttons are stored in button_configs and rendered in the project workspace
+10. Python Backend and Server-Side Execution
+
+A lightweight Node.js (Express) or Python (FastAPI) backend service handles process execution — this runs alongside the React frontend in deployment
+API endpoints: POST /api/inference/run, GET /api/inference/status/:jobId, POST /api/project/install-deps, GET /api/files/list/:projectId, POST /api/files/upload, DELETE /api/files/:path
+Each project gets its own folder: /projects/{project_id}/model/, /projects/{project_id}/venv/
+Job queue handles concurrent inference requests (per your "multiple users at once" concern — queue with job IDs, websocket or polling for status)
+Bolt Database Edge Functions proxy authenticated frontend requests to this backend
+The database abstraction layer uses an adapter pattern so swapping Bolt Database for MongoDB only requires changing the adapter, not the business logic
+11. Export, Sharing, and User Data Persistence
+
+"Export JSON" button downloads the current (edited or original) inference JSON for the selected image
+Users can share a project link — recipients with accounts can view images and JSONs in read-only mode
+Inference history per image: each save creates a new version row so edits are non-destructive
+User preferences (widget layout overrides, hotkey settings) stored per user per project
+Summary of Approach
+
+This builds in three layers: the React frontend (Bolt/Vite) handles the visual canvas, widget system, and contour editing; Bolt Database handles auth, storage, and the relational data; a Node.js or FastAPI backend handles all Python process management and file system operations. The adapter pattern on the data layer means MongoDB can replace Bolt Database Postgres with minimal refactoring. The widget system is the most novel piece — it uses a dot-grid collision system similar to what you showed in button_example.jpeg, giving admins complete control over layout without any hardcoded panel positions.
+
+Before I proceed — three clarifying questions:
+
+For the Python execution backend, do you have a server/VPS where this will be deployed, or do you need it to work entirely within a serverless environment like Bolt Database Edge Functions? (This affects whether we can actually spawn Python processes.)
+
+For the contour editor, should users be able to add or delete points on a contour path, or only move existing points? The JSON shows very dense point arrays (hundreds of coordinates per tooth).
+
+Should multiple users be able to run inference simultaneously and each get their own results stored separately, or does one inference result per image serve all users on that project?
